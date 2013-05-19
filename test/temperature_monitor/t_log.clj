@@ -5,4 +5,7 @@
 (facts "about logging temperatures"
        (against-background [(around :checks (let [log (->ConsoleLog)] ?form))]
                            (fact "logging without a sensor"
-                             (add-entry log nil 0 0) => (throws java.lang.AssertionError))))
+                                 (add-entry log nil 0 0) => (throws java.lang.AssertionError))
+                           (fact "logging with an invalid sensor id"
+                                 (add-entry log "a" 0 0) => (throws java.lang.AssertionError))
+                           ))
