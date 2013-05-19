@@ -1,6 +1,7 @@
 (ns temperature_monitor.t-monitor
-  (:require [temperature_monitor.log :as l])
-  (:require [temperature_monitor.alarm :as a])
+  (:require [temperature_monitor.log :as l]
+            [temperature_monitor.alarm :as a]
+            [temperature_monitor.sensor :as s])
   (:use midje.sweet
         temperature_monitor.monitor))
 
@@ -9,7 +10,11 @@
                                                   dur 2000
                                                   log (l/->ConsoleLog)
                                                   alarm (a/->ConsoleAlarm)
-                                                  sensors []] ?form))]
+                                                  sensors [(s/create-queue-sensor 0 [1])
+                                                           (s/create-queue-sensor 1 [2])
+                                                           (s/create-queue-sensor 2 [3])]]
+                                              ?form))]
+
                            (fact "with a nil threshold value"
                                  (create-peak-monitor nil dur log alarm sensors) => (throws java.lang.AssertionError))
                            (fact "with a nil duration"
@@ -31,4 +36,12 @@
                            (fact "with a too few sensors"
                                  (create-peak-monitor thr dur log alarm []) => (throws java.lang.AssertionError))
                            (fact "with non-sensors"
-                                 (create-peak-monitor thr dur log alarm ["a" "b" "c"]) => (throws java.lang.AssertionError))))
+                                 (create-peak-monitor thr dur log alarm ["a" "b" "c"])
+                                 => (throws java.lang.AssertionError))
+
+                           (fact "with valid arguments"
+                                 (create-peak-monitor thr dur log alarm sensors)
+                                 => (contains {:duration dur
+                                               :log {}
+                                               :alarm {}
+                                               :threshhold-fn fn?}))))
