@@ -16,5 +16,7 @@
 
                            (fact "logging without a timestamp"
                                  (add-entry log 0 0 nil) => (throws java.lang.AssertionError))
+                           (fact "logging with an invalid timestamp"
+                                 (add-entry log 0 0 "a") => (throws java.lang.AssertionError))
 
                            ))
