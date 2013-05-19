@@ -11,4 +11,4 @@
 
 (extend-type QueueSensor Sensor
   (get-id [this] (get this :id))
-  (get-temperature [this] :undefined))
+  (get-temperature [this] (first (get this :temperatures))))
