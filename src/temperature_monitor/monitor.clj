@@ -14,6 +14,7 @@
    or more sensors are above the threshold temperature for at least two
    seconds."
   [threshold duration log alarm sensors]
+  {:pre [(number? threshold)]}
   (->ThresholdMonitor (fn [t] (> t threshold)) duration log alarm sensors))
 
 (extend-type ThresholdMonitor Monitor
