@@ -2,7 +2,7 @@
 
 Temperature Monitor allows you to monitor the temperature of sensors. If the value of two or more of the sensors reach a threshhold temperature for multiple seconds, an alarm message is triggers. It uses [Midje](https://github.com/marick/Midje/) for testing and was built to try out TDD with test doubles.
 
-![Design](../blob/master/public/design.png?raw=true)
+![Design](https://github.com/bivory/temperature-monitor/raw/master/public/design.png)
 
 There are test doubles for the Alarm, TemperatureLog, and TemperatureSensors.
 
