@@ -10,12 +10,14 @@
                                                   log (l/->ConsoleLog)
                                                   alarm (a/->ConsoleAlarm)
                                                   sensors []] ?form))]
-                           (fact "with a invalid threshold value"
+                           (fact "with a nil threshold value"
                                  (create-peak-monitor nil dur log alarm sensors) => (throws java.lang.AssertionError))
-                           (fact "with a invalid threshold value"
+                           (fact "with a nil duration"
                                  (create-peak-monitor thr nil log alarm sensors) => (throws java.lang.AssertionError))
-                           (fact "with a invalid threshold value"
+                           (fact "with zero duration"
                                  (create-peak-monitor thr 0 log alarm sensors) => (throws java.lang.AssertionError))
-                           (fact "with a invalid threshold value"
+                           (fact "with a negative duration"
                                  (create-peak-monitor thr -1 log alarm sensors) => (throws java.lang.AssertionError))
+                           (fact "with a nil logger"
+                                 (create-peak-monitor thr dur nil alarm sensors) => (throws java.lang.AssertionError))
                            ))

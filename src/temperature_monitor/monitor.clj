@@ -16,7 +16,8 @@
   [threshold duration log alarm sensors]
   {:pre [(number? threshold)
          (number? duration)
-         (pos? duration)]}
+         (pos? duration)
+         (not (nil? log))]}
   (->ThresholdMonitor (fn [t] (> t threshold)) duration log alarm sensors))
 
 (extend-type ThresholdMonitor Monitor
