@@ -1,7 +1,7 @@
 (ns temperature_monitor.log
   (:use [midje.open-protocols]))
 
-(defprotocol TemperatureLog
+(defprotocol Log
   "Allows temperature readings from the monitored sensors to be recorded."
   (add-entry [this sensor-id temperature timestamp]
              "Creates a new log entry, logging the time at which a temperature
@@ -9,7 +9,7 @@
 
 (defrecord-openly ConsoleLog [])
 
-(extend-type ConsoleLog TemperatureLog
+(extend-type ConsoleLog Log
   (add-entry [this sensor-id temperature timestamp]
     {:pre [(number? sensor-id)
            (number? temperature)
