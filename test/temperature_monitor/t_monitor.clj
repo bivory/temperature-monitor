@@ -24,4 +24,6 @@
                                  (create-peak-monitor thr dur 0 alarm sensors) => (throws java.lang.AssertionError))
                            (fact "with an invalid alarm"
                                  (create-peak-monitor thr dur log 0 sensors) => (throws java.lang.AssertionError))
+                           (fact "with a invalid sensors"
+                                 (create-peak-monitor thr dur log alarm nil) => (throws java.lang.AssertionError))
                            ))
