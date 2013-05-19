@@ -4,5 +4,6 @@
 
 (facts "about temperature alarm"
        (against-background [(around :checks (let [alarm (->ConsoleAlarm)] ?form))]
-                           (fact (sound-alarm alarm) => true)))
+                           (fact "Sounding the console alarm will beep"
+                             (sound-alarm alarm) => true)))
 
