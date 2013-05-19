@@ -10,14 +10,16 @@
   (stop [this] "Stop monitoring the sensors."))
 
 
-(defrecord-openly ThresholdMonitor [threshold-fn duration log alarm sensors])
+(defrecord-openly ThresholdMonitor [threshold-fn max-exceeded duration log alarm sensors])
 
 (defn create-peak-monitor
   "Create a Monitor that sounds an alarm if the temperature readings from two
    or more sensors are above the threshold temperature for at least two
    seconds."
-  [threshold duration log alarm sensors]
+  [threshold max-exceeded duration log alarm sensors]
   {:pre [(number? threshold)
+         (number? max-exceeded)
+         (pos? max-exceeded)
          (number? duration)
          (pos? duration)
          (satisfies? l/Log log)
@@ -25,10 +27,10 @@
          (not (nil? sensors))
          (> (count sensors) 2)
          (every? true? (map (partial satisfies? s/Sensor) sensors))]}
-  (->ThresholdMonitor (fn [t] (> t threshold)) duration log alarm sensors))
+  (->ThresholdMonitor (fn [t] (> t threshold)) max-exceeded duration log alarm sensors))
 
 (extend-type ThresholdMonitor Monitor
-  (start [this] :undefined)
+  (start [this poll-interval] :undefined)
   (stop [this] :undefined))
 
 

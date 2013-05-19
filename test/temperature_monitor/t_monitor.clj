@@ -11,6 +11,7 @@
 
 (facts "about creating a peak monitor"
        (against-background [(around :checks (let [thr 60
+                                                  max-exceeded 2
                                                   dur 2000
                                                   log (l/->ConsoleLog)
                                                   alarm (a/->ConsoleAlarm)
@@ -20,31 +21,50 @@
                                               ?form))]
 
                            (fact "with a nil threshold value"
-                                 (create-peak-monitor nil dur log alarm sensors) => (throws java.lang.AssertionError))
+                                 (create-peak-monitor nil max-exceeded dur log alarm sensors)
+                                 => (throws java.lang.AssertionError))
+                           (fact "with a nil maximum number of sensors exceeded"
+                                 (create-peak-monitor thr nil dur log alarm sensors)
+                                 => (throws java.lang.AssertionError))
+                           (fact "with a zero maximum number of sensors exceeded"
+                                 (create-peak-monitor thr 0 dur log alarm sensors)
+                                 => (throws java.lang.AssertionError))
+                           (fact "with a negative maximum number of sensors exceeded"
+                                 (create-peak-monitor thr -1 dur log alarm sensors)
+                                 => (throws java.lang.AssertionError))
                            (fact "with a nil duration"
-                                 (create-peak-monitor thr nil log alarm sensors) => (throws java.lang.AssertionError))
+                                 (create-peak-monitor thr max-exceeded nil log alarm sensors)
+                                 => (throws java.lang.AssertionError))
                            (fact "with zero duration"
-                                 (create-peak-monitor thr 0 log alarm sensors) => (throws java.lang.AssertionError))
+                                 (create-peak-monitor thr max-exceeded 0 log alarm sensors)
+                                 => (throws java.lang.AssertionError))
                            (fact "with a negative duration"
-                                 (create-peak-monitor thr -1 log alarm sensors) => (throws java.lang.AssertionError))
+                                 (create-peak-monitor thr max-exceeded -1 log alarm sensors)
+                                 => (throws java.lang.AssertionError))
                            (fact "with a nil logger"
-                                 (create-peak-monitor thr dur nil alarm sensors) => (throws java.lang.AssertionError))
+                                 (create-peak-monitor thr max-exceeded dur nil alarm sensors)
+                                 => (throws java.lang.AssertionError))
                            (fact "with an invalid logger"
-                                 (create-peak-monitor thr dur 0 alarm sensors) => (throws java.lang.AssertionError))
+                                 (create-peak-monitor thr max-exceeded dur 0 alarm sensors)
+                                 => (throws java.lang.AssertionError))
                            (fact "with an invalid alarm"
-                                 (create-peak-monitor thr dur log 0 sensors) => (throws java.lang.AssertionError))
+                                 (create-peak-monitor thr max-exceeded dur log 0 sensors)
+                                 => (throws java.lang.AssertionError))
                            (fact "with nil sensors"
-                                 (create-peak-monitor thr dur log alarm nil) => (throws java.lang.AssertionError))
+                                 (create-peak-monitor thr max-exceeded dur log alarm nil)
+                                 => (throws java.lang.AssertionError))
                            (fact "with invalid sensors"
-                                 (create-peak-monitor thr dur log alarm "a") => (throws java.lang.AssertionError))
+                                 (create-peak-monitor thr max-exceeded dur log alarm "a")
+                                 => (throws java.lang.AssertionError))
                            (fact "with a too few sensors"
-                                 (create-peak-monitor thr dur log alarm []) => (throws java.lang.AssertionError))
+                                 (create-peak-monitor thr max-exceeded dur log alarm [])
+                                 => (throws java.lang.AssertionError))
                            (fact "with non-sensors"
-                                 (create-peak-monitor thr dur log alarm ["a" "b" "c"])
+                                 (create-peak-monitor thr max-exceeded dur log alarm ["a" "b" "c"])
                                  => (throws java.lang.AssertionError))
 
                            (fact "with valid arguments"
-                                 (create-peak-monitor thr dur log alarm sensors)
+                                 (create-peak-monitor thr max-exceeded dur log alarm sensors)
                                  => (contains {:duration dur
                                                :log {}
                                                :alarm {}
