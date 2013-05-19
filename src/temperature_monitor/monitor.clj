@@ -1,4 +1,6 @@
 (ns temperature_monitor.monitor
+  (:require [temperature_monitor.log :as l]
+            [temperature_monitor.alarm :as a])
   (:use [midje.open-protocols]))
 
 (defprotocol Monitor
@@ -17,7 +19,7 @@
   {:pre [(number? threshold)
          (number? duration)
          (pos? duration)
-         (not (nil? log))]}
+         (satisfies? l/Log log)]}
   (->ThresholdMonitor (fn [t] (> t threshold)) duration log alarm sensors))
 
 (extend-type ThresholdMonitor Monitor

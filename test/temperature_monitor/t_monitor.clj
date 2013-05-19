@@ -1,8 +1,8 @@
 (ns temperature_monitor.t-monitor
   (:require [temperature_monitor.log :as l])
   (:require [temperature_monitor.alarm :as a])
-  (:use midje.sweet)
-  (:use [temperature_monitor.monitor]))
+  (:use midje.sweet
+        temperature_monitor.monitor))
 
 (facts "about creating a peak monitor"
        (against-background [(around :checks (let [thr 60
@@ -20,4 +20,6 @@
                                  (create-peak-monitor thr -1 log alarm sensors) => (throws java.lang.AssertionError))
                            (fact "with a nil logger"
                                  (create-peak-monitor thr dur nil alarm sensors) => (throws java.lang.AssertionError))
+                           (fact "with an invalid logger"
+                                 (create-peak-monitor thr dur 0 alarm sensors) => (throws java.lang.AssertionError))
                            ))
