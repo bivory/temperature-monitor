@@ -13,4 +13,8 @@
                                  (add-entry log 0 nil 0) => (throws java.lang.AssertionError))
                            (fact "logging with an invalid temperature"
                                  (add-entry log 0 "a" 0) => (throws java.lang.AssertionError))
+
+                           (fact "logging without a timestamp"
+                                 (add-entry log 0 0 nil) => (throws java.lang.AssertionError))
+
                            ))

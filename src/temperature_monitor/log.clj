@@ -12,5 +12,6 @@
 (extend-type ConsoleLog TemperatureLog
   (add-entry [this sensor-id temperature timestamp]
              {:pre [(number? sensor-id)
-                    (number? temperature)]}
+                    (number? temperature)
+                    (number? timestamp)]}
              :undefined))
