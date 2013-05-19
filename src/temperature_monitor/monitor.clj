@@ -33,11 +33,10 @@
 
 
 (defn- ^{:testable true} get-exceeded-sensors
-  "Returns a list of the sensors that have exceeded the threshold."
+  "Given a map of sensor temperatures, it returns a list of the sensors
+   that have exceeded the threshold."
   [threshold-fn sensors]
+  (filter (fn [{:keys [temperature]}] (threshold-fn temperature)) sensors))
   (->> sensors
        (map (juxt s/get-id s/get-temperature))
-       (filter (fn [[id t]] (threshold-fn t)))
        (map (fn [[id t]] {:id id :temperature t}))))
-
-

@@ -51,9 +51,9 @@
                                                :threshhold-fn fn?}))))
 
 (facts "about get-exceeded-sensors"
-       (against-background [(around :checks (let [sensors [(s/create-queue-sensor 0 [1])
-                                                           (s/create-queue-sensor 1 [2])
-                                                           (s/create-queue-sensor 2 [3])]]
+       (against-background [(around :checks (let [sensors [{:id 0 :temperature 1}
+                                                           {:id 1 :temperature 2}
+                                                           {:id 2 :temperature 3}]]
                                               ?form))]
                            (fact "no exceeded sensors"
                                  (get-exceeded-sensors pos? sensors) => [{:id 0 :temperature 1}
