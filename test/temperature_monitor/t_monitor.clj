@@ -14,4 +14,6 @@
                                  (create-peak-monitor nil dur log alarm sensors) => (throws java.lang.AssertionError))
                            (fact "with a invalid threshold value"
                                  (create-peak-monitor thr nil log alarm sensors) => (throws java.lang.AssertionError))
+                           (fact "with a invalid threshold value"
+                                 (create-peak-monitor thr 0 log alarm sensors) => (throws java.lang.AssertionError))
                            ))
