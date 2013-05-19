@@ -21,7 +21,8 @@
          (pos? duration)
          (satisfies? l/Log log)
          (satisfies? a/Alarm alarm)
-         (not (nil? sensors))]}
+         (not (nil? sensors))
+         (> (count sensors) 2)]}
   (->ThresholdMonitor (fn [t] (> t threshold)) duration log alarm sensors))
 
 (extend-type ThresholdMonitor Monitor
