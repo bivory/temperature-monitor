@@ -8,4 +8,7 @@
                                  (add-entry log nil 0 0) => (throws java.lang.AssertionError))
                            (fact "logging with an invalid sensor id"
                                  (add-entry log "a" 0 0) => (throws java.lang.AssertionError))
+
+                           (fact "logging with an invalid temperature"
+                                 (add-entry log 0 "a" 0) => (throws java.lang.AssertionError))
                            ))
