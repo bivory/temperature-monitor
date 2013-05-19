@@ -1,6 +1,7 @@
 (ns temperature_monitor.monitor
   (:require [temperature_monitor.log :as l]
-            [temperature_monitor.alarm :as a])
+            [temperature_monitor.alarm :as a]
+            [temperature_monitor.sensor :as s])
   (:use [midje.open-protocols]))
 
 (defprotocol Monitor
@@ -22,7 +23,8 @@
          (satisfies? l/Log log)
          (satisfies? a/Alarm alarm)
          (not (nil? sensors))
-         (> (count sensors) 2)]}
+         (> (count sensors) 2)
+         (every? true? (map (partial satisfies? s/Sensor) sensors))]}
   (->ThresholdMonitor (fn [t] (> t threshold)) duration log alarm sensors))
 
 (extend-type ThresholdMonitor Monitor

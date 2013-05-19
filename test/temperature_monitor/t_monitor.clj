@@ -30,4 +30,5 @@
                                  (create-peak-monitor thr dur log alarm "a") => (throws java.lang.AssertionError))
                            (fact "with a too few sensors"
                                  (create-peak-monitor thr dur log alarm []) => (throws java.lang.AssertionError))
-                           ))
+                           (fact "with non-sensors"
+                                 (create-peak-monitor thr dur log alarm ["a" "b" "c"]) => (throws java.lang.AssertionError))))
