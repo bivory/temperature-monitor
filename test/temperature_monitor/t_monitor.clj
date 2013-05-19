@@ -64,3 +64,17 @@
                                                                              {:id 2 :temperature 3}])
                            (fact "all exceeded sensors"
                                  (get-exceeded-sensors neg? sensors) => [])))
+
+(facts "about check-sensors"
+       (against-background [(around :checks (let [sensors [(s/create-queue-sensor 0 [1])
+                                                           (s/create-queue-sensor 1 [2])
+                                                           (s/create-queue-sensor 2 [3])]]
+                                              ?form))]
+                           (fact "given nil sensors"
+                                 (check-sensors nil) => (throws java.lang.AssertionError))
+                           (fact "given no sensors"
+                                 (check-sensors []) => [])
+                           (fact "given three sensors"
+                                 (check-sensors sensors) => [{:id 0 :temperature 1}
+                                                             {:id 1 :temperature 2}
+                                                             {:id 2 :temperature 3}])))

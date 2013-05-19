@@ -37,6 +37,12 @@
    that have exceeded the threshold."
   [threshold-fn sensors]
   (filter (fn [{:keys [temperature]}] (threshold-fn temperature)) sensors))
+
+(defn- ^{:testable true} check-sensors
+  "Returns a list of sensor ids and readings."
+  [sensors]
+  {:pre [(not (nil? sensors))
+         (coll? sensors)]}
   (->> sensors
        (map (juxt s/get-id s/get-temperature))
        (map (fn [[id t]] {:id id :temperature t}))))
