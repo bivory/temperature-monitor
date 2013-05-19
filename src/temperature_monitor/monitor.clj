@@ -10,7 +10,7 @@
   (stop [this] "Stop monitoring the sensors."))
 
 
-(defrecord-openly ThresholdMonitor [threshhold-fn duration log alarm sensors])
+(defrecord-openly ThresholdMonitor [threshold-fn duration log alarm sensors])
 
 (defn create-peak-monitor
   "Create a Monitor that sounds an alarm if the temperature readings from two

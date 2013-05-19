@@ -48,7 +48,7 @@
                                  => (contains {:duration dur
                                                :log {}
                                                :alarm {}
-                                               :threshhold-fn fn?}))))
+                                               :threshold-fn fn?}))))
 
 (facts "about get-exceeded-sensors"
        (against-background [(around :checks (let [sensors [{:id 0 :temperature 1}
