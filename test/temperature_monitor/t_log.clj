@@ -20,4 +20,6 @@
                                  (add-entry log 0 0 "a") => (throws java.lang.AssertionError))
 
                            (fact "logging a temperature"
-                                 (add-entry log 0 1 2) => "2: Read a temperature of 1 from sensor 0.")))
+                                 (add-entry log 0 1 2) => "2: Read a temperature of 1 from sensor 0.")
+                           (fact "logging a negative temperature"
+                                 (add-entry log 0 -1 2) => "2: Read a temperature of -1 from sensor 0.")))
