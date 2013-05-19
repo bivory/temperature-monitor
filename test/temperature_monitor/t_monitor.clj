@@ -79,6 +79,9 @@
                                               ?form))]
                            (fact "given nil sensors"
                                  (check-sensors nil) => (throws java.lang.AssertionError))
+                           (fact "given non-sensors"
+                                 (check-sensors ["a" 0]) => (throws java.lang.AssertionError))
+
                            (fact "given no sensors"
                                  (check-sensors []) => [])
                            (fact "given three sensors"

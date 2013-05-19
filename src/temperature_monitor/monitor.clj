@@ -44,7 +44,8 @@
   "Returns a list of sensor ids and readings."
   [sensors]
   {:pre [(not (nil? sensors))
-         (coll? sensors)]}
+         (coll? sensors)
+         (every? true? (map (partial satisfies? s/Sensor) sensors))]}
   (->> sensors
        (map (juxt s/get-id s/get-temperature))
        (map (fn [[id t]] {:id id :temperature t}))))
