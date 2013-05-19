@@ -36,6 +36,7 @@
   "Given a map of sensor temperatures, it returns a list of the sensors
    that have exceeded the threshold."
   [threshold-fn sensors]
+  {:pre [(fn? threshold-fn)]}
   (filter (fn [{:keys [temperature]}] (threshold-fn temperature)) sensors))
 
 (defn- ^{:testable true} check-sensors
