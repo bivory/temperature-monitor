@@ -4,15 +4,7 @@
             [temperature_monitor.sensor :as s])
   (:use [midje.open-protocols]))
 
-(defprotocol Monitor
-  "Monitor a list of sensors for a threshold value."
-  (start [this] "Start monitoring the sensors.")
-  (stop [this] "Stop monitoring the sensors."))
-
-
-(defrecord-openly ThresholdMonitor [threshold-fn max-exceeded duration log alarm sensors])
-
-(defn create-peak-monitor
+(defn- ^{:testable true} create-peak-monitor
   "Create a Monitor that sounds an alarm if the temperature readings from two
    or more sensors are above the threshold temperature for at least two
    seconds."
@@ -27,12 +19,12 @@
          (not (nil? sensors))
          (> (count sensors) 2)
          (every? true? (map (partial satisfies? s/Sensor) sensors))]}
-  (->ThresholdMonitor (fn [t] (> t threshold)) max-exceeded duration log alarm sensors))
-
-(extend-type ThresholdMonitor Monitor
-  (start [this poll-interval] :undefined)
-  (stop [this] :undefined))
-
+  {:threshold-fn (fn [t] (> t threshold))
+   :max-exceeded max-exceeded
+   :duration duration
+   :log log
+   :alarm alarm
+   :sensors sensors})
 
 (defn- ^{:testable true} get-exceeded-sensors
   "Given a map of sensor temperatures, it returns a list of the sensors
@@ -51,3 +43,24 @@
   (->> sensors
        (map (juxt s/get-id s/get-temperature))
        (map (fn [[id t]] {:id id :temperature t}))))
+
+
+(defprotocol Monitor
+  "Monitor a list of sensors for a threshold value."
+  (start [this poll-interval] "Start monitoring the sensors.")
+  (stop [this] "Stop monitoring the sensors."))
+
+
+(defrecord-openly ATATMonitor [monitor])
+
+(extend-type ATATMonitor Monitor
+  (start [this poll-interval] :undefined)
+  (stop [this] :undefined))
+
+(defn create-atat-monitor
+  "Create an ATATMonitor that sounds an alarm if the temperature readings from
+   two or more sensors are above the threshold temperature for at least two
+   seconds."
+  [threshold max-exceeded duration log alarm sensors]
+  (let [m (create-peak-monitor threshold max-exceeded duration log alarm sensors)]
+    (->ATATMonitor m)))
