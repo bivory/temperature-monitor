@@ -59,6 +59,9 @@
                                  (get-exceeded-sensors nil sensors) => (throws java.lang.AssertionError))
                            (fact "given a bad threshold function"
                                  (get-exceeded-sensors "a" sensors) => (throws java.lang.AssertionError))
+                           (fact "given nil sensors"
+                                 (get-exceeded-sensors pos? nil) => (throws java.lang.AssertionError))
+
                            (fact "no exceeded sensors"
                                  (get-exceeded-sensors pos? sensors) => [{:id 0 :temperature 1}
                                                                          {:id 1 :temperature 2}
