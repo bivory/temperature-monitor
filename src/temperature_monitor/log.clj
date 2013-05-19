@@ -11,7 +11,10 @@
 
 (extend-type ConsoleLog TemperatureLog
   (add-entry [this sensor-id temperature timestamp]
-             {:pre [(number? sensor-id)
-                    (number? temperature)
-                    (number? timestamp)]}
-             :undefined))
+    {:pre [(number? sensor-id)
+           (number? temperature)
+           (number? timestamp)]}
+    (let [output (str timestamp ": Read a temperature of "
+                      temperature " from sensor " sensor-id ".")]
+      (println output)
+      output)))
