@@ -31,3 +31,13 @@
   (start [this] :undefined)
   (stop [this] :undefined))
 
+
+(defn- ^{:testable true} get-exceeded-sensors
+  "Returns a list of the sensors that have exceeded the threshold."
+  [threshold-fn sensors]
+  (->> sensors
+       (map (juxt s/get-id s/get-temperature))
+       (filter (fn [[id t]] (threshold-fn t)))
+       (map (fn [[id t]] {:id id :temperature t}))))
+
+

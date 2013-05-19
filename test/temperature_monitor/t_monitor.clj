@@ -3,7 +3,11 @@
             [temperature_monitor.alarm :as a]
             [temperature_monitor.sensor :as s])
   (:use midje.sweet
+        [midje.util :only [expose-testables]]
         temperature_monitor.monitor))
+
+;; Expose private functions in temperature_monitor.monitor for testing
+(expose-testables temperature_monitor.monitor)
 
 (facts "about creating a peak monitor"
        (against-background [(around :checks (let [thr 60
@@ -45,3 +49,18 @@
                                                :log {}
                                                :alarm {}
                                                :threshhold-fn fn?}))))
+
+(facts "about get-exceeded-sensors"
+       (against-background [(around :checks (let [sensors [(s/create-queue-sensor 0 [1])
+                                                           (s/create-queue-sensor 1 [2])
+                                                           (s/create-queue-sensor 2 [3])]]
+                                              ?form))]
+                           (fact "no exceeded sensors"
+                                 (get-exceeded-sensors pos? sensors) => [{:id 0 :temperature 1}
+                                                                         {:id 1 :temperature 2}
+                                                                         {:id 2 :temperature 3}])
+                           (fact "two exceeded sensors"
+                                 (get-exceeded-sensors #(> % 1) sensors) => [{:id 1 :temperature 2}
+                                                                             {:id 2 :temperature 3}])
+                           (fact "all exceeded sensors"
+                                 (get-exceeded-sensors neg? sensors) => [])))
