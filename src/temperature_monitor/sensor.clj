@@ -7,8 +7,18 @@
   (get-id [this] "Get the id of this sensor."))
 
 
-(defrecord-openly QueueSensor [id temperatures])
+(defrecord-openly QueueSensor [id offset temperatures])
+
+(defn create-queue-sensor
+  [id temperatures]
+  (let [offset (atom 0)]
+    (->QueueSensor id offset temperatures)))
 
 (extend-type QueueSensor Sensor
   (get-id [this] (get this :id))
-  (get-temperature [this] (first (get this :temperatures))))
+  (get-temperature [this]
+    (let [offset (get this :offset)
+          n @offset
+          ts (get this :temperatures)]
+      (swap! offset (fn [x] (mod (inc x) (count ts))))
+      (nth ts n))))
