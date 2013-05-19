@@ -6,4 +6,6 @@
 
 (defrecord-openly ConsoleAlarm []
   Alarm
-  (sound-alarm [this] :unfinished))
+  (sound-alarm [this]
+               (println "\007")
+               true))
