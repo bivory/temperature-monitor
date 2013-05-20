@@ -18,7 +18,7 @@
          (satisfies? l/Log log)
          (satisfies? a/Alarm alarm)
          (not (nil? sensors))
-         (> (count sensors) 2)
+         (>= (count sensors) max-exceeded)
          (every? true? (map (partial satisfies? s/Sensor) sensors))]}
   {:threshold-fn (fn [t] (> t threshold))
    :max-exceeded max-exceeded
