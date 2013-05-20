@@ -133,13 +133,18 @@
                                  (create-atat-monitor thr max-exceeded dur log alarm sensors)
                                  => (contains {:monitor anything :poll-fn fn?}))
 
-                           (fact "running the thread calls the poll-function"
+                           (fact "running the thread calls the poll-function once"
+                                 (let [m (create-atat-monitor thr max-exceeded dur log alarm sensors)
+                                       m-next (start m 250)
+                                       _ (Thread/sleep 200)]
+                                   (stop m-next)) => anything
+                                 (provided
+                                   (#'temperature_monitor.monitor/sensor-loop anything) => {} :times 1))
+
+                           (fact "running the thread calls the poll-function twice"
                                  (let [m (create-atat-monitor thr max-exceeded dur log alarm sensors)
                                        m-next (start m 250)
                                        _ (Thread/sleep 300)]
                                    (stop m-next)) => anything
                                  (provided
-                                   (#'temperature_monitor.monitor/sensor-loop anything) => {}))
-
-                           ;; TODO test that running the thread calls the poll-function and saves the state
-                           ))
+                                   (#'temperature_monitor.monitor/sensor-loop anything) => {} :times 2))))
