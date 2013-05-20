@@ -16,8 +16,11 @@
          (pos? max-exceeded)
          (number? duration)
          (pos? duration)
+         (not (nil? timestamp))
          (satisfies? t/Timestamp timestamp)
+         (not (nil? log))
          (satisfies? l/Log log)
+         (not (nil? alarm))
          (satisfies? a/Alarm alarm)
          (not (nil? sensors))
          (>= (count sensors) max-exceeded)
@@ -87,15 +90,15 @@
    it has lasted for the provided time duraction, an alarm will be raised
    and the temperatures will be logged."
   [{:keys [threshold-fn max-exceeded duration-fn timestamp log alarm sensors] :as m}]
-  (let [timestamp (t/get-timestamp timestamp)
+  (let [curr-time (t/get-timestamp timestamp)
         sensor-temps (check-sensors sensors)
         exceeded-temps (get-exceeded-sensors threshold-fn sensor-temps)
         last-exceeded-times (get m :sensor-exceeded-times {})
-        exceeded-times (update-exceeded-times last-exceeded-times timestamp exceeded-temps)
-        exceeded-durations (get-exceeded-durations duration-fn timestamp exceeded-times)]
+        exceeded-times (update-exceeded-times last-exceeded-times curr-time exceeded-temps)
+        exceeded-durations (get-exceeded-durations duration-fn curr-time exceeded-times)]
     (when (>= (count exceeded-durations) max-exceeded)
       (a/sound-alarm alarm)
-      (dorun (map (fn [{:keys [id temperature]}] (l/add-entry log id temperature timestamp)) exceeded-temps)))
+      (dorun (map (fn [{:keys [id temperature]}] (l/add-entry log id temperature curr-time)) exceeded-temps)))
     (assoc m :sensor-exceeded-times exceeded-times)))
 
 
@@ -113,14 +116,16 @@
   [poll-fn state]
   (let [wrapped-state (atom state)]
     (fn []
-      (->> (poll-fn @wrapped-state)
-           (reset! wrapped-state)))))
+      (try
+        (->> (poll-fn @wrapped-state)
+             (reset! wrapped-state))
+        (catch Exception e (println "caught " (.getMessage e)))))))
 
 (extend-type ATATMonitor Monitor
 
   (start [this poll-interval]
     (let [pool (or (get this :pool) (at-at/mk-pool))
-          poll-fn (wrap-atat-poll-fn (get this :poll-fn) this)
+          poll-fn (wrap-atat-poll-fn (get this :poll-fn) (get this :monitor))
           thread (at-at/every poll-interval poll-fn pool)]
       (-> this
           (assoc :thread thread)
