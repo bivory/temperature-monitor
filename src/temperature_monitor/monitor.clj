@@ -1,7 +1,8 @@
 (ns temperature_monitor.monitor
   (:require [temperature_monitor.log :as l]
             [temperature_monitor.alarm :as a]
-            [temperature_monitor.sensor :as s])
+            [temperature_monitor.sensor :as s]
+            [overtone.at-at :as at-at])
   (:use [midje.open-protocols]))
 
 (defn- ^{:testable true} create-peak-monitor
@@ -54,8 +55,18 @@
 (defrecord-openly ATATMonitor [monitor])
 
 (extend-type ATATMonitor Monitor
-  (start [this poll-interval] :undefined)
-  (stop [this] :undefined))
+
+  (start [this poll-interval]
+          poll-fn #(println "Hi");; TODO
+      (-> this
+          (assoc :thread thread)
+          (assoc :pool pool))))
+
+  (stop [this]
+    (let [thread (get this :thread)]
+      (when (not (nil? thread))
+        (at-at/stop thread))
+      (dissoc this :thread))))
 
 (defn create-atat-monitor
   "Create an ATATMonitor that sounds an alarm if the temperature readings from
