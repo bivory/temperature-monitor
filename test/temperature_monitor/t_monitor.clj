@@ -218,10 +218,10 @@
                                                   dur 2000
                                                   log (l/->ConsoleLog)
                                                   alarm (a/->ConsoleAlarm)
-                                                  times (t/create-queue-timestamp [0 1000 2000 3000])
-                                                  sensors [(s/create-queue-sensor 0 [1 62 61 65])
-                                                           (s/create-queue-sensor 1 [2 0  10 1])
-                                                           (s/create-queue-sensor 2 [3 82 63 67])]
+                                                  times (t/create-queue-timestamp [0 1000 2000 3000 4000])
+                                                  sensors [(s/create-queue-sensor 0 [1 62 61 65 0])
+                                                           (s/create-queue-sensor 1 [2 0  10 1 61])
+                                                           (s/create-queue-sensor 2 [3 82 63 67 68])]
                                                   m (create-peak-monitor thr
                                                                          max-exceeded
                                                                          dur
@@ -250,6 +250,24 @@
                                                                   :log {}
                                                                   :max-exceeded 2
                                                                   :sensor-exceeded-times {0 1000, 2 1000}
+                                                                  :sensors coll?
+                                                                  :threshold-fn fn?})
+                                 (provided
+                                   (temperature_monitor.alarm/sound-alarm alarm) => true :times 1
+                                   (temperature_monitor.log/add-entry log anything anything anything)
+                                   => true :times 2))
+
+                           (fact "Reading unsafe temperatures over the duration will be logged and sound the alarm."
+                                 (-> m
+                                     (sensor-loop)
+                                     (sensor-loop)
+                                     (sensor-loop)
+                                     (sensor-loop)
+                                     (sensor-loop)) => (contains {:alarm {}
+                                                                  :duration-fn fn?
+                                                                  :log {}
+                                                                  :max-exceeded 2
+                                                                  :sensor-exceeded-times {1 4000, 2 1000}
                                                                   :sensors coll?
                                                                   :threshold-fn fn?})
                                  (provided
