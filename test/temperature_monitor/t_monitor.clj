@@ -125,13 +125,16 @@
 
 (facts "about get-exceeded-durations"
        (fact "given nil threshold function"
-             (get-exceeded-durations nil {}) => (throws java.lang.AssertionError))
+             (get-exceeded-durations nil 0 {}) => (throws java.lang.AssertionError))
        (fact "given invalid threshold function"
-             (get-exceeded-durations "a" {}) => (throws java.lang.AssertionError))
+             (get-exceeded-durations "a" 0 {}) => (throws java.lang.AssertionError))
+       (fact "given nil timestamp"
+             (get-exceeded-durations identity nil {}) => (throws java.lang.AssertionError))
+       (fact "given invalid timestamp"
+             (get-exceeded-durations identity "a" {}) => (throws java.lang.AssertionError))
        (fact "given nil durations"
-             (get-exceeded-durations identity nil) => (throws java.lang.AssertionError))
+             (get-exceeded-durations identity 0 nil) => (throws java.lang.AssertionError))
        (fact "given invalid durations"
-             (get-exceeded-durations identity "a") => (throws java.lang.AssertionError))
        )
 
 (facts "about check-sensors"

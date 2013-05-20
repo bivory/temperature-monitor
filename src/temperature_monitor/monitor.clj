@@ -58,8 +58,10 @@
 (defn- ^{:testable true} get-exceeded-durations
   "Returns a list of sensors that have triggered the duration threshold
    function."
-  [threshold-fn durations]
+  [threshold-fn curr-timestamp durations]
   {:pre [(fn? threshold-fn)
+         (not (nil? curr-timestamp))
+         (number? curr-timestamp)
          (not (nil? durations))
          (coll? durations)]}
   :undefined)
