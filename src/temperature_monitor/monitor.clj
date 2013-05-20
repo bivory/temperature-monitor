@@ -2,6 +2,7 @@
   (:require [temperature_monitor.log :as l]
             [temperature_monitor.alarm :as a]
             [temperature_monitor.sensor :as s]
+            [temperature_monitor.timestamp :as t]
             [overtone.at-at :as at-at])
   (:use [midje.open-protocols]))
 
@@ -9,20 +10,23 @@
   "Create a Monitor that sounds an alarm if the temperature readings from two
    or more sensors are above the threshold temperature for at least two
    seconds."
-  [threshold max-exceeded duration log alarm sensors]
+  [threshold max-exceeded duration timestamp log alarm sensors]
   {:pre [(number? threshold)
          (number? max-exceeded)
          (pos? max-exceeded)
          (number? duration)
          (pos? duration)
+         (satisfies? t/Timestamp timestamp)
          (satisfies? l/Log log)
          (satisfies? a/Alarm alarm)
          (not (nil? sensors))
          (>= (count sensors) max-exceeded)
          (every? true? (map (partial satisfies? s/Sensor) sensors))]}
   {:threshold-fn (fn [t] (> t threshold))
+   :duration-fn (fn [t] (>= t duration))
    :max-exceeded max-exceeded
    :duration duration
+   :timestamp timestamp
    :log log
    :alarm alarm
    :sensors sensors})
@@ -83,14 +87,18 @@
    When max-exceeded number of sensors trip the threshold function and
    it has lasted for the provided time duraction, an alarm will be raised
    and the temperatures will be logged."
-  [{:keys [threshold-fn max-exceeded duration log alarm sensors] :as m}]
-  (let [timestamp 0 ;; TODO
+  [{:keys [threshold-fn max-exceeded duration-fn timestamp log alarm sensors] :as m}]
+  (let [timestamp (t/get-timestamp timestamp)
         sensor-temps (check-sensors sensors)
-        exceeded-temps (get-exceeded-sensors threshold-fn sensor-temps)]
-    (when (>= (count exceeded-temps) max-exceeded)
+        exceeded-temps (get-exceeded-sensors threshold-fn sensor-temps)
+        last-exceeded-times (get m :sensor-exceeded-times {})
+        exceeded-times (update-exceeded-times last-exceeded-times timestamp exceeded-temps)
+        exceeded-durations (get-exceeded-durations duration-fn timestamp exceeded-times)]
+    (when (>= (count exceeded-durations) max-exceeded)
+      (println exceeded-durations)
       (a/sound-alarm alarm)
       (dorun (map (fn [{:keys [id temperature]}] (l/add-entry log id temperature timestamp)) exceeded-temps)))
-    m))
+    (assoc m :sensor-exceeded-times exceeded-times)))
 
 
 (defprotocol Monitor
@@ -130,8 +138,8 @@
   "Create an ATATMonitor that sounds an alarm if the temperature readings from
    two or more sensors are above the threshold temperature for at least two
    seconds."
-  [threshold max-exceeded duration log alarm sensors & {:keys [poll-fn]
-                                                        :or {poll-fn sensor-loop}}]
-  (let [m (create-peak-monitor threshold max-exceeded duration log alarm sensors)]
+  [threshold max-exceeded duration timestamp log alarm sensors & {:keys [poll-fn]
+                                                                  :or {poll-fn sensor-loop}}]
+  (let [m (create-peak-monitor threshold max-exceeded duration timestamp log alarm sensors)]
     (-> (->ATATMonitor m)
         (assoc :poll-fn poll-fn))))

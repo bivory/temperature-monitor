@@ -1,7 +1,8 @@
 (ns temperature_monitor.t-monitor
   (:require [temperature_monitor.log :as l]
             [temperature_monitor.alarm :as a]
-            [temperature_monitor.sensor :as s])
+            [temperature_monitor.sensor :as s]
+            [temperature_monitor.timestamp :as t])
   (:use midje.sweet
         [midje.util :only [expose-testables]]
         temperature_monitor.monitor))
@@ -15,59 +16,68 @@
                                                   dur 2000
                                                   log (l/->ConsoleLog)
                                                   alarm (a/->ConsoleAlarm)
+                                                  times (t/create-queue-timestamp [0])
                                                   sensors [(s/create-queue-sensor 0 [1])
                                                            (s/create-queue-sensor 1 [2])
                                                            (s/create-queue-sensor 2 [3])]]
                                               ?form))]
 
                            (fact "with a nil threshold value"
-                                 (create-peak-monitor nil max-exceeded dur log alarm sensors)
+                                 (create-peak-monitor nil max-exceeded dur times log alarm sensors)
                                  => (throws java.lang.AssertionError))
                            (fact "with a nil maximum number of sensors exceeded"
-                                 (create-peak-monitor thr nil dur log alarm sensors)
+                                 (create-peak-monitor thr nil dur times log alarm sensors)
                                  => (throws java.lang.AssertionError))
                            (fact "with a zero maximum number of sensors exceeded"
-                                 (create-peak-monitor thr 0 dur log alarm sensors)
+                                 (create-peak-monitor thr 0 dur times log alarm sensors)
                                  => (throws java.lang.AssertionError))
                            (fact "with a negative maximum number of sensors exceeded"
-                                 (create-peak-monitor thr -1 dur log alarm sensors)
+                                 (create-peak-monitor thr -1 dur times log alarm sensors)
                                  => (throws java.lang.AssertionError))
                            (fact "with a nil duration"
-                                 (create-peak-monitor thr max-exceeded nil log alarm sensors)
+                                 (create-peak-monitor thr max-exceeded nil times log alarm sensors)
                                  => (throws java.lang.AssertionError))
                            (fact "with zero duration"
-                                 (create-peak-monitor thr max-exceeded 0 log alarm sensors)
+                                 (create-peak-monitor thr max-exceeded 0 times log alarm sensors)
                                  => (throws java.lang.AssertionError))
                            (fact "with a negative duration"
-                                 (create-peak-monitor thr max-exceeded -1 log alarm sensors)
+                                 (create-peak-monitor thr max-exceeded -1 times log alarm sensors)
+                                 => (throws java.lang.AssertionError))
+                           (fact "with a nil timestamper"
+                                 (create-peak-monitor thr max-exceeded dur nil log alarm sensors)
+                                 => (throws java.lang.AssertionError))
+                           (fact "with an invalid timestamper"
+                                 (create-peak-monitor thr max-exceeded dur 0 log alarm sensors)
                                  => (throws java.lang.AssertionError))
                            (fact "with a nil logger"
-                                 (create-peak-monitor thr max-exceeded dur nil alarm sensors)
+                                 (create-peak-monitor thr max-exceeded dur times nil alarm sensors)
                                  => (throws java.lang.AssertionError))
                            (fact "with an invalid logger"
-                                 (create-peak-monitor thr max-exceeded dur 0 alarm sensors)
+                                 (create-peak-monitor thr max-exceeded dur times 0 alarm sensors)
                                  => (throws java.lang.AssertionError))
                            (fact "with an invalid alarm"
-                                 (create-peak-monitor thr max-exceeded dur log 0 sensors)
+                                 (create-peak-monitor thr max-exceeded dur times log 0 sensors)
                                  => (throws java.lang.AssertionError))
                            (fact "with nil sensors"
-                                 (create-peak-monitor thr max-exceeded dur log alarm nil)
+                                 (create-peak-monitor thr max-exceeded dur times log alarm nil)
                                  => (throws java.lang.AssertionError))
                            (fact "with invalid sensors"
-                                 (create-peak-monitor thr max-exceeded dur log alarm "a")
+                                 (create-peak-monitor thr max-exceeded dur times log alarm "a")
                                  => (throws java.lang.AssertionError))
                            (fact "with a too few sensors"
-                                 (create-peak-monitor thr max-exceeded dur log alarm [])
+                                 (create-peak-monitor thr max-exceeded dur times log alarm [])
                                  => (throws java.lang.AssertionError))
                            (fact "with non-sensors"
-                                 (create-peak-monitor thr max-exceeded dur log alarm ["a" "b" "c"])
+                                 (create-peak-monitor thr max-exceeded dur times log alarm ["a" "b" "c"])
                                  => (throws java.lang.AssertionError))
 
                            (fact "with valid arguments"
-                                 (create-peak-monitor thr max-exceeded dur log alarm sensors)
+                                 (create-peak-monitor thr max-exceeded dur times log alarm sensors)
                                  => (contains {:duration dur
+                                               :timestamp coll?
                                                :log {}
                                                :alarm {}
+                                               :sensors coll?
                                                :threshold-fn fn?}))))
 
 (facts "about get-exceeded-sensors"
@@ -174,6 +184,7 @@
        (against-background [(around :checks (let [thr 60
                                                   max-exceeded 2
                                                   dur 2000
+                                                  times (t/create-queue-timestamp [0])
                                                   log (l/->ConsoleLog)
                                                   alarm (a/->ConsoleAlarm)
                                                   sensors [(s/create-queue-sensor 0 [1])
@@ -182,11 +193,11 @@
                                               ?form))]
 
                            (fact "can be created"
-                                 (create-atat-monitor thr max-exceeded dur log alarm sensors)
+                                 (create-atat-monitor thr max-exceeded dur times log alarm sensors)
                                  => (contains {:monitor anything :poll-fn fn?}))
 
                            (fact "running the thread calls the poll-function once"
-                                 (let [m (create-atat-monitor thr max-exceeded dur log alarm sensors)
+                                 (let [m (create-atat-monitor thr max-exceeded dur times log alarm sensors)
                                        m-next (start m 250)
                                        _ (Thread/sleep 200)]
                                    (stop m-next)) => anything
@@ -194,7 +205,7 @@
                                    (#'temperature_monitor.monitor/sensor-loop anything) => {} :times 1))
 
                            (fact "running the thread calls the poll-function twice"
-                                 (let [m (create-atat-monitor thr max-exceeded dur log alarm sensors)
+                                 (let [m (create-atat-monitor thr max-exceeded dur times log alarm sensors)
                                        m-next (start m 250)
                                        _ (Thread/sleep 300)]
                                    (stop m-next)) => anything
@@ -207,26 +218,40 @@
                                                   dur 2000
                                                   log (l/->ConsoleLog)
                                                   alarm (a/->ConsoleAlarm)
-                                                  timestamps [0 1000 2000]
-                                                  sensors [(s/create-queue-sensor 0 [1 62 61])
-                                                           (s/create-queue-sensor 1 [2 0 10])
-                                                           (s/create-queue-sensor 2 [3 82 63])]
+                                                  times (t/create-queue-timestamp [0 1000 2000 3000])
+                                                  sensors [(s/create-queue-sensor 0 [1 62 61 65])
+                                                           (s/create-queue-sensor 1 [2 0  10 1])
+                                                           (s/create-queue-sensor 2 [3 82 63 67])]
                                                   m (create-peak-monitor thr
                                                                          max-exceeded
                                                                          dur
+                                                                         times
                                                                          log
                                                                          alarm
                                                                          sensors)]
                                               ?form))]
 
                            (fact "Reading safe temperature will not trigger the alarm."
-                                 (sensor-loop m) => m)
+                                 (sensor-loop m) => (contains {:alarm {}
+                                                               :duration 2000
+                                                               :log {}
+                                                               :max-exceeded 2
+                                                               :sensor-exceeded-times {}
+                                                               :sensors coll?
+                                                               :threshold-fn fn?}))
 
                            (fact "Reading unsafe temperatures over the duration will be logged and sound the alarm."
                                  (-> m
                                      (sensor-loop)
                                      (sensor-loop)
-                                     (sensor-loop)) => m
+                                     (sensor-loop)
+                                     (sensor-loop)) => (contains {:alarm {}
+                                                                  :duration 2000
+                                                                  :log {}
+                                                                  :max-exceeded 2
+                                                                  :sensor-exceeded-times {0 1000, 2 1000}
+                                                                  :sensors coll?
+                                                                  :threshold-fn fn?})
                                  (provided
                                    (temperature_monitor.alarm/sound-alarm alarm) => true :times 1
                                    (temperature_monitor.log/add-entry log anything anything anything)
