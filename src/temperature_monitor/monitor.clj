@@ -58,7 +58,7 @@
 
   (start [this poll-interval]
     (let [pool (or (get this :pool) (at-at/mk-pool))
-          poll-fn #(println "Hi");; TODO
+          poll-fn (get this :poll-fn)
           thread (at-at/every poll-interval poll-fn pool)]
       (-> this
           (assoc :thread thread)
@@ -69,6 +69,11 @@
       (when (not (nil? thread))
         (at-at/stop thread))
       (dissoc this :thread))))
+
+(defn- atat-poll
+  [this]
+  (println "Hi")
+  this)
 
 (defn create-atat-monitor
   "Create an ATATMonitor that sounds an alarm if the temperature readings from

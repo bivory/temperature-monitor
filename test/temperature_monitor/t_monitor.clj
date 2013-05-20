@@ -108,3 +108,18 @@
                                  (check-sensors sensors) => [{:id 0 :temperature 1}
                                                              {:id 1 :temperature 2}
                                                              {:id 2 :temperature 3}])))
+
+
+(facts "about ATATMonitor"
+       (against-background [(around :checks (let [thr 60
+                                                  max-exceeded 2
+                                                  dur 2000
+                                                  log (l/->ConsoleLog)
+                                                  alarm (a/->ConsoleAlarm)
+                                                  sensors [(s/create-queue-sensor 0 [1])
+                                                           (s/create-queue-sensor 1 [2])
+                                                           (s/create-queue-sensor 2 [3])]]
+                                              ?form))]
+                           (fact "can be created"
+                                 (create-atat-monitor thr max-exceeded dur log alarm sensors)
+                                 => (contains {:monitor anything :poll-fn fn?}))))
