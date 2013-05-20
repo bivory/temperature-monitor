@@ -45,6 +45,14 @@
        (map (juxt s/get-id s/get-temperature))
        (map (fn [[id t]] {:id id :temperature t}))))
 
+(defn- ^{:testable true} sensor-loop
+  "Polls all the sensors to sample the current temperature readings.
+   When max-exceeded number of sensors trip the threshold function and
+   it has lasted for the provided time duraction, an alarm will be raised
+   and the temperatures will be logged."
+  [{:keys [threshold-fn max-exceeded duration log alarm sensors] :as m}]
+  m)
+
 
 (defprotocol Monitor
   "Monitor a list of sensors for a threshold value."
@@ -79,17 +87,12 @@
         (at-at/stop thread))
       (dissoc this :thread))))
 
-(defn- atat-poll
-  [this]
-  (println "Hi")
-  this)
-
 (defn create-atat-monitor
   "Create an ATATMonitor that sounds an alarm if the temperature readings from
    two or more sensors are above the threshold temperature for at least two
    seconds."
   [threshold max-exceeded duration log alarm sensors & {:keys [poll-fn]
-                                                        :or {poll-fn atat-poll}}]
+                                                        :or {poll-fn sensor-loop}}]
   (let [m (create-peak-monitor threshold max-exceeded duration log alarm sensors)]
     (-> (->ATATMonitor m)
         (assoc :poll-fn poll-fn))))
