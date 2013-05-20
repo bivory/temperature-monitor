@@ -132,10 +132,17 @@
              (get-exceeded-durations identity nil {}) => (throws java.lang.AssertionError))
        (fact "given invalid timestamp"
              (get-exceeded-durations identity "a" {}) => (throws java.lang.AssertionError))
-       (fact "given nil durations"
+       (fact "given nil start-times"
              (get-exceeded-durations identity 0 nil) => (throws java.lang.AssertionError))
-       (fact "given invalid durations"
-       )
+       (fact "given invalid start-times"
+             (get-exceeded-durations identity 0 "a") => (throws java.lang.AssertionError))
+
+       (fact "given all exceeded durations"
+             (get-exceeded-durations pos? 4 {0 1, 1 1, 2 3}) => {0 1, 1 1, 2 3})
+       (fact "given some exceeded durations"
+             (get-exceeded-durations pos? 3 {0 1, 1 1, 2 3}) => {0 1, 1 1})
+       (fact "given no exceeded durations"
+             (get-exceeded-durations #(> % 3) 3 {0 1, 1 1, 2 3}) => {}))
 
 (facts "about check-sensors"
        (against-background [(around :checks (let [sensors [(s/create-queue-sensor 0 [1])
