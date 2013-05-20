@@ -25,7 +25,6 @@
   {:threshold-fn (fn [t] (> t threshold))
    :duration-fn (fn [t] (>= t duration))
    :max-exceeded max-exceeded
-   :duration duration
    :timestamp timestamp
    :log log
    :alarm alarm
@@ -62,14 +61,14 @@
 (defn- ^{:testable true} get-exceeded-durations
   "Returns a list of sensors that have triggered the duration threshold
    function."
-  [threshold-fn curr-timestamp start-times]
-  {:pre [(fn? threshold-fn)
+  [duration-fn curr-timestamp start-times]
+  {:pre [(fn? duration-fn)
          (not (nil? curr-timestamp))
          (number? curr-timestamp)
          (not (nil? start-times))
          (coll? start-times)]}
   (->> start-times
-       (filter (fn [[id dur]] (threshold-fn (- curr-timestamp dur))))
+       (filter (fn [[id dur]] (duration-fn (- curr-timestamp dur))))
        (into {})))
 
 (defn- ^{:testable true} check-sensors
@@ -95,7 +94,6 @@
         exceeded-times (update-exceeded-times last-exceeded-times timestamp exceeded-temps)
         exceeded-durations (get-exceeded-durations duration-fn timestamp exceeded-times)]
     (when (>= (count exceeded-durations) max-exceeded)
-      (println exceeded-durations)
       (a/sound-alarm alarm)
       (dorun (map (fn [{:keys [id temperature]}] (l/add-entry log id temperature timestamp)) exceeded-temps)))
     (assoc m :sensor-exceeded-times exceeded-times)))

@@ -73,7 +73,7 @@
 
                            (fact "with valid arguments"
                                  (create-peak-monitor thr max-exceeded dur times log alarm sensors)
-                                 => (contains {:duration dur
+                                 => (contains {:duration-fn fn?
                                                :timestamp coll?
                                                :log {}
                                                :alarm {}
@@ -233,7 +233,7 @@
 
                            (fact "Reading safe temperature will not trigger the alarm."
                                  (sensor-loop m) => (contains {:alarm {}
-                                                               :duration 2000
+                                                               :duration-fn fn?
                                                                :log {}
                                                                :max-exceeded 2
                                                                :sensor-exceeded-times {}
@@ -246,7 +246,7 @@
                                      (sensor-loop)
                                      (sensor-loop)
                                      (sensor-loop)) => (contains {:alarm {}
-                                                                  :duration 2000
+                                                                  :duration-fn fn?
                                                                   :log {}
                                                                   :max-exceeded 2
                                                                   :sensor-exceeded-times {0 1000, 2 1000}
