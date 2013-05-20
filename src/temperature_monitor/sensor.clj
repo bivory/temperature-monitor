@@ -10,6 +10,10 @@
 (defrecord-openly QueueSensor [id offset temperatures])
 
 (defn create-queue-sensor
+  "Creates a Queue Sensor that doesn't actually return values from physical
+   sensor hardware. Instead it returns temperatures that are given to it
+   at the time this function is called. This is useful behavior for test
+   doubles."
   [id temperatures]
   (let [offset (atom 0)]
     (->QueueSensor id offset temperatures)))
