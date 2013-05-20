@@ -57,7 +57,9 @@
 (extend-type ATATMonitor Monitor
 
   (start [this poll-interval]
+    (let [pool (or (get this :pool) (at-at/mk-pool))
           poll-fn #(println "Hi");; TODO
+          thread (at-at/every poll-interval poll-fn pool)]
       (-> this
           (assoc :thread thread)
           (assoc :pool pool))))
