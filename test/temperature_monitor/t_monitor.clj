@@ -131,4 +131,15 @@
 
                            (fact "can be created"
                                  (create-atat-monitor thr max-exceeded dur log alarm sensors)
-                                 => (contains {:monitor anything :poll-fn fn?}))))
+                                 => (contains {:monitor anything :poll-fn fn?}))
+
+                           (fact "running the thread calls the poll-function"
+                                 (let [m (create-atat-monitor thr max-exceeded dur log alarm sensors)
+                                       m-next (start m 250)
+                                       _ (Thread/sleep 300)]
+                                   (stop m-next)) => anything
+                                 (provided
+                                   (#'temperature_monitor.monitor/sensor-loop anything) => {}))
+
+                           ;; TODO test that running the thread calls the poll-function and saves the state
+                           ))

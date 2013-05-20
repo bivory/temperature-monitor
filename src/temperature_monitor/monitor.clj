@@ -51,6 +51,7 @@
    it has lasted for the provided time duraction, an alarm will be raised
    and the temperatures will be logged."
   [{:keys [threshold-fn max-exceeded duration log alarm sensors] :as m}]
+  ;; TODO
   m)
 
 
@@ -75,7 +76,7 @@
 
   (start [this poll-interval]
     (let [pool (or (get this :pool) (at-at/mk-pool))
-          poll-fn (wrap-atat-poll-fn (get this :poll-fn))
+          poll-fn (wrap-atat-poll-fn (get this :poll-fn) this)
           thread (at-at/every poll-interval poll-fn pool)]
       (-> this
           (assoc :thread thread)
