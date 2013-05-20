@@ -257,7 +257,8 @@
                                    (temperature_monitor.log/add-entry log anything anything anything)
                                    => true :times 2))
 
-                           (fact "Reading unsafe temperatures over the duration will be logged and sound the alarm."
+                           (fact "Reading unsafe temperatures over the duration will be logged and sound the alarm
+                                  but not be triggered again if two sensors haven't been active for > 2 seconds."
                                  (-> m
                                      (sensor-loop)
                                      (sensor-loop)
@@ -273,4 +274,31 @@
                                  (provided
                                    (temperature_monitor.alarm/sound-alarm alarm) => true :times 1
                                    (temperature_monitor.log/add-entry log anything anything anything)
-                                   => true :times 2))))
+                                   => true :times 2))
+
+                           (fact "Reading unsafe temperatures over the duration will be logged and sound the alarm
+                                  multiple times if longer than a second."
+                                 (-> (create-peak-monitor thr
+                                                          max-exceeded
+                                                          dur
+                                                          times
+                                                          log
+                                                          alarm
+                                                          [(s/create-queue-sensor 0 [0])
+                                                           (s/create-queue-sensor 1 [0  70 71 71 71])
+                                                           (s/create-queue-sensor 2 [80 79 78 77 76])])
+                                     (sensor-loop)
+                                     (sensor-loop)
+                                     (sensor-loop)
+                                     (sensor-loop)
+                                     (sensor-loop)) => (contains {:alarm {}
+                                                                  :duration-fn fn?
+                                                                  :log {}
+                                                                  :max-exceeded 2
+                                                                  :sensor-exceeded-times {1 1000, 2 0}
+                                                                  :sensors coll?
+                                                                  :threshold-fn fn?})
+                                 (provided
+                                   (temperature_monitor.alarm/sound-alarm alarm) => true :times 2
+                                   (temperature_monitor.log/add-entry log anything anything anything)
+                                   => true :times 4))))

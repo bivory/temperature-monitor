@@ -11,12 +11,12 @@
         temperature-threshold 45
         max-sensor-exceeded 2
         exceeded-duration 2000
-        times (t/create-queue-timestamp [0])
+        times (t/create-queue-timestamp [0 250 500 750 1000 1250 1500 1750 2000 2250])
         log (l/->ConsoleLog)
         alarm (a/->ConsoleAlarm)
-        sensors [(s/create-queue-sensor 0 [0])
-                 (s/create-queue-sensor 1 [0])
-                 (s/create-queue-sensor 2 [0])
+        sensors [(s/create-queue-sensor 0 [50 50 51 50])
+                 (s/create-queue-sensor 1 [62 61 62 61])
+                 (s/create-queue-sensor 2 [79])
                  (s/create-queue-sensor 3 [0])]
         monitor (m/create-atat-monitor temperature-threshold
                                        max-sensor-exceeded
@@ -26,6 +26,6 @@
                                        alarm
                                        sensors)
         monitor-next (m/start monitor sensor-poll-interval)]
-    (Thread/sleep 1000)
+    (Thread/sleep 2000)
     (m/stop monitor-next)
     (System/exit 0)))
