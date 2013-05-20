@@ -110,6 +110,14 @@
                                                              {:id 2 :temperature 3}])))
 
 
+(facts "about wrap-atat-poll-fn"
+       (fact "saves unmodified state"
+             ((wrap-atat-poll-fn identity {})) => {}
+       (fact "saves state modified by the passed in function"
+             ((wrap-atat-poll-fn inc 1)) => 2
+       (fact "saves complex state modified by the passed in function"
+             ((wrap-atat-poll-fn #(assoc % :a 10) {:a 1 :b 2 :c 3})) => {:a 10 :b 2 :c 3}))))
+
 (facts "about ATATMonitor"
        (against-background [(around :checks (let [thr 60
                                                   max-exceeded 2
@@ -120,6 +128,7 @@
                                                            (s/create-queue-sensor 1 [2])
                                                            (s/create-queue-sensor 2 [3])]]
                                               ?form))]
+
                            (fact "can be created"
                                  (create-atat-monitor thr max-exceeded dur log alarm sensors)
                                  => (contains {:monitor anything :poll-fn fn?}))))

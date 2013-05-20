@@ -54,11 +54,20 @@
 
 (defrecord-openly ATATMonitor [monitor])
 
+(defn- ^{:testable true} wrap-atat-poll-fn
+  "Wraps a callback function with the provided state. The At-At library doesn't
+   provide a way to save state."
+  [poll-fn state]
+  (let [wrapped-state (atom state)]
+    (fn []
+      (->> (poll-fn @wrapped-state)
+           (reset! wrapped-state)))))
+
 (extend-type ATATMonitor Monitor
 
   (start [this poll-interval]
     (let [pool (or (get this :pool) (at-at/mk-pool))
-          poll-fn (get this :poll-fn)
+          poll-fn (wrap-atat-poll-fn (get this :poll-fn))
           thread (at-at/every poll-interval poll-fn pool)]
       (-> this
           (assoc :thread thread)
@@ -79,6 +88,8 @@
   "Create an ATATMonitor that sounds an alarm if the temperature readings from
    two or more sensors are above the threshold temperature for at least two
    seconds."
-  [threshold max-exceeded duration log alarm sensors]
+  [threshold max-exceeded duration log alarm sensors & {:keys [poll-fn]
+                                                        :or {poll-fn atat-poll}}]
   (let [m (create-peak-monitor threshold max-exceeded duration log alarm sensors)]
-    (->ATATMonitor m)))
+    (-> (->ATATMonitor m)
+        (assoc :poll-fn poll-fn))))
