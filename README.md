@@ -33,6 +33,10 @@ Run `git clone https://github.com/bivory/temperature-monitor.git` to clone the r
 watcher on the code files. If they change, only the relevant tests will be
 run again.
 
+## How to run
+
+`lein run` will run for 2.25 seconds using faked sensor data.
+
 ## License
 
 Copyright © 2013 Bryan Ivory
