@@ -93,21 +93,27 @@
                                  (get-exceeded-sensors neg? sensors) => [])))
 
 (facts "about update-exceeded-times"
-       (fact "given nil previous time"
-             (update-exceeded-times nil 0 {}) => (throws java.lang.AssertionError))
-       (fact "given invalid previous time"
-             (update-exceeded-times "a" 0 {}) => (throws java.lang.AssertionError))
+       (against-background [(around :checks (let [sensors [{:id 0 :temperature 1}
+                                                           {:id 2 :temperature 3}]]
+                                              ?form))]
 
-       (fact "given nil timestamp"
-             (update-exceeded-times {} nil {}) => (throws java.lang.AssertionError))
-       (fact "given invalid timestamp"
-             (update-exceeded-times 0 nil {}) => (throws java.lang.AssertionError))
+                           (fact "given nil previous time"
+                                 (update-exceeded-times nil 0 {}) => (throws java.lang.AssertionError))
+                           (fact "given invalid previous time"
+                                 (update-exceeded-times "a" 0 {}) => (throws java.lang.AssertionError))
+                           (fact "given nil timestamp"
+                                 (update-exceeded-times {} nil {}) => (throws java.lang.AssertionError))
+                           (fact "given invalid timestamp"
+                                 (update-exceeded-times 0 nil {}) => (throws java.lang.AssertionError))
+                           (fact "given nil sensor readings"
+                                 (update-exceeded-times {} 0 nil) => (throws java.lang.AssertionError))
+                           (fact "given invalid sensor readings"
+                                 (update-exceeded-times {} 0 "a") => (throws java.lang.AssertionError))
 
-       (fact "given nil sensor readings"
-             (update-exceeded-times {} 0 nil) => (throws java.lang.AssertionError))
-       (fact "given invalid sensor readings"
-             (update-exceeded-times {} 0 "a") => (throws java.lang.AssertionError))
-       )
+                           (fact "given sensor readings with no previous times"
+                                 (update-exceeded-times {} 0 sensors) => {0 0, 2 0}
+                                 (update-exceeded-times {} 1 sensors) => {0 1, 2 1})
+                           ))
 
 
 (facts "about check-sensors"
