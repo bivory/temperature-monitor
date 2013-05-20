@@ -35,6 +35,13 @@
          (not (nil? sensors))]}
   (filter (fn [{:keys [temperature]}] (threshold-fn temperature)) sensors))
 
+(defn- ^{:testable true} update-exceeded-times
+  "Given a map of the current sensor temperatures that failed the threshold,
+   the current timestamp and a map of the when the sensors first failed the
+   threshold, the first failed map will be updated.
+   If a sensor is not listed in the current sensor temperatures, it will be
+   removed from the first failed map."
+  [prev-times curr-time curr-temps]
 (defn- ^{:testable true} check-sensors
   "Returns a list of sensor ids and readings."
   [sensors]

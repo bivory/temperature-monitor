@@ -92,6 +92,16 @@
                            (fact "all exceeded sensors"
                                  (get-exceeded-sensors neg? sensors) => [])))
 
+(facts "about update-exceeded-times"
+       (fact "given nil previous time"
+             (update-exceeded-times nil 0 {}) => (throws java.lang.AssertionError))
+       (fact "given nil timestamp"
+             (update-exceeded-times {} nil {}) => (throws java.lang.AssertionError))
+       (fact "given nil sensor readings"
+             (update-exceeded-times {} 0 nil) => (throws java.lang.AssertionError))
+       )
+
+
 (facts "about check-sensors"
        (against-background [(around :checks (let [sensors [(s/create-queue-sensor 0 [1])
                                                            (s/create-queue-sensor 1 [2])
@@ -170,13 +180,12 @@
                            (fact "Reading safe temperature will not trigger the alarm."
                                  (sensor-loop m) => m)
 
-                           (fact "Reading unsafe temperatures will be logged and sound the alarm."
+                           (fact "Reading unsafe temperatures over the duration will be logged and sound the alarm."
                                  (-> m
                                      (sensor-loop)
                                      (sensor-loop)
                                      (sensor-loop)) => m
                                  (provided
-                                   (temperature_monitor.alarm/sound-alarm alarm) => true :times 2
+                                   (temperature_monitor.alarm/sound-alarm alarm) => true :times 1
                                    (temperature_monitor.log/add-entry log anything anything anything)
-                                   => true :times 4))
-                           ))
+                                   => true :times 2))))
