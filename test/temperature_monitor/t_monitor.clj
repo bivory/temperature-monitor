@@ -123,6 +123,16 @@
                                  (update-exceeded-times {0 0, 2 0} 1 (drop 1 sensors)) => {2 0}
                                  (update-exceeded-times {0 1, 2 2} 3 (take 1 sensors)) => {0 1})))
 
+(facts "about get-exceeded-durations"
+       (fact "given nil threshold function"
+             (get-exceeded-durations nil {}) => (throws java.lang.AssertionError))
+       (fact "given invalid threshold function"
+             (get-exceeded-durations "a" {}) => (throws java.lang.AssertionError))
+       (fact "given nil durations"
+             (get-exceeded-durations identity nil) => (throws java.lang.AssertionError))
+       (fact "given invalid durations"
+             (get-exceeded-durations identity "a") => (throws java.lang.AssertionError))
+       )
 
 (facts "about check-sensors"
        (against-background [(around :checks (let [sensors [(s/create-queue-sensor 0 [1])

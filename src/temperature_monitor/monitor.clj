@@ -55,6 +55,15 @@
          (filter (fn [[id t]] (contains? curr-times id)))
          (into {}))))
 
+(defn- ^{:testable true} get-exceeded-durations
+  "Returns a list of sensors that have triggered the duration threshold
+   function."
+  [threshold-fn durations]
+  {:pre [(fn? threshold-fn)
+         (not (nil? durations))
+         (coll? durations)]}
+  :undefined)
+
 (defn- ^{:testable true} check-sensors
   "Returns a list of sensor ids and readings."
   [sensors]
