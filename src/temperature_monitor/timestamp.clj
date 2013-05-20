@@ -12,6 +12,9 @@
    Instead it returns timestamps that are given to it at the time this function
    is called. This is useful behavior for test doubles."
   [timestamps]
+  {:pre [(not (nil? timestamps))
+         (coll? timestamps)
+         (> (count timestamps) 0)]}
   (let [offset (atom 0)]
     (->QueueTimestamp offset timestamps)))
 

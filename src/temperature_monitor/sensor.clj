@@ -15,6 +15,10 @@
    at the time this function is called. This is useful behavior for test
    doubles."
   [id temperatures]
+  {:pre [(number? id)
+         (not (nil? temperatures))
+         (coll? temperatures)
+         (> (count temperatures) 0)]}
   (let [offset (atom 0)]
     (->QueueSensor id offset temperatures)))
 
