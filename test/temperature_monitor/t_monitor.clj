@@ -148,3 +148,23 @@
                                    (stop m-next)) => anything
                                  (provided
                                    (#'temperature_monitor.monitor/sensor-loop anything) => {} :times 2))))
+
+(facts "about sensor-loop"
+       (against-background [(around :checks (let [thr 60
+                                                  max-exceeded 2
+                                                  dur 2000
+                                                  log (l/->ConsoleLog)
+                                                  alarm (a/->ConsoleAlarm)
+                                                  sensors [(s/create-queue-sensor 0 [1 60 61])
+                                                           (s/create-queue-sensor 1 [2 2 60])
+                                                           (s/create-queue-sensor 2 [3 2 60])]
+                                                  m (create-peak-monitor thr
+                                                                         max-exceeded
+                                                                         dur
+                                                                         log
+                                                                         alarm
+                                                                         sensors)]
+                                              ?form))]
+
+                           (fact "Reading safe temperature swill not trigger the alarm."
+                                 (sensor-loop m) => m)))
