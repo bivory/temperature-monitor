@@ -51,8 +51,12 @@
    it has lasted for the provided time duraction, an alarm will be raised
    and the temperatures will be logged."
   [{:keys [threshold-fn max-exceeded duration log alarm sensors] :as m}]
-  ;; TODO
-  m)
+  (let [timestamp 0 ;; TODO
+        sensor-temps (check-sensors sensors)
+        exceeded-temps (get-exceeded-sensors threshold-fn sensor-temps)]
+    (when (>= (count exceeded-temps) max-exceeded)
+      (dorun (map (fn [{:keys [id temperature]}] (l/add-entry log id temperature timestamp)) exceeded-temps)))
+    m))
 
 
 (defprotocol Monitor

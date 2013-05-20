@@ -155,9 +155,10 @@
                                                   dur 2000
                                                   log (l/->ConsoleLog)
                                                   alarm (a/->ConsoleAlarm)
-                                                  sensors [(s/create-queue-sensor 0 [1 60 61])
-                                                           (s/create-queue-sensor 1 [2 2 60])
-                                                           (s/create-queue-sensor 2 [3 2 60])]
+                                                  timestamps [0 1000 2000]
+                                                  sensors [(s/create-queue-sensor 0 [1 62 61])
+                                                           (s/create-queue-sensor 1 [2 0 10])
+                                                           (s/create-queue-sensor 2 [3 82 63])]
                                                   m (create-peak-monitor thr
                                                                          max-exceeded
                                                                          dur
@@ -166,5 +167,15 @@
                                                                          sensors)]
                                               ?form))]
 
-                           (fact "Reading safe temperature swill not trigger the alarm."
-                                 (sensor-loop m) => m)))
+                           (fact "Reading safe temperature will not trigger the alarm."
+                                 (sensor-loop m) => m)
+
+                           (fact "Reading unsafe temperatures will be logged."
+                                 (-> m
+                                   (sensor-loop)
+                                   (sensor-loop)
+                                   (sensor-loop)) => m
+                                 (provided
+                                   (temperature_monitor.log/add-entry log anything anything anything)
+                                   => true :times 4))
+                           ))
