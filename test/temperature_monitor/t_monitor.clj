@@ -95,10 +95,18 @@
 (facts "about update-exceeded-times"
        (fact "given nil previous time"
              (update-exceeded-times nil 0 {}) => (throws java.lang.AssertionError))
+       (fact "given invalid previous time"
+             (update-exceeded-times "a" 0 {}) => (throws java.lang.AssertionError))
+
        (fact "given nil timestamp"
              (update-exceeded-times {} nil {}) => (throws java.lang.AssertionError))
+       (fact "given invalid timestamp"
+             (update-exceeded-times 0 nil {}) => (throws java.lang.AssertionError))
+
        (fact "given nil sensor readings"
              (update-exceeded-times {} 0 nil) => (throws java.lang.AssertionError))
+       (fact "given invalid sensor readings"
+             (update-exceeded-times {} 0 "a") => (throws java.lang.AssertionError))
        )
 
 

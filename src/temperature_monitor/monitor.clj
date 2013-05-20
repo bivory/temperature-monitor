@@ -42,6 +42,14 @@
    If a sensor is not listed in the current sensor temperatures, it will be
    removed from the first failed map."
   [prev-times curr-time curr-temps]
+  {:pre [(not (nil? prev-times))
+         (coll? prev-times)
+         (not (nil? curr-time))
+         (number? curr-time)
+         (not (nil? curr-temps))
+         (coll? curr-temps)]}
+  :undefined)
+
 (defn- ^{:testable true} check-sensors
   "Returns a list of sensor ids and readings."
   [sensors]
