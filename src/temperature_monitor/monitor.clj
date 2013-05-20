@@ -55,6 +55,7 @@
         sensor-temps (check-sensors sensors)
         exceeded-temps (get-exceeded-sensors threshold-fn sensor-temps)]
     (when (>= (count exceeded-temps) max-exceeded)
+      (a/sound-alarm alarm)
       (dorun (map (fn [{:keys [id temperature]}] (l/add-entry log id temperature timestamp)) exceeded-temps)))
     m))
 

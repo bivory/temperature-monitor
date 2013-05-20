@@ -170,12 +170,13 @@
                            (fact "Reading safe temperature will not trigger the alarm."
                                  (sensor-loop m) => m)
 
-                           (fact "Reading unsafe temperatures will be logged."
+                           (fact "Reading unsafe temperatures will be logged and sound the alarm."
                                  (-> m
-                                   (sensor-loop)
-                                   (sensor-loop)
-                                   (sensor-loop)) => m
+                                     (sensor-loop)
+                                     (sensor-loop)
+                                     (sensor-loop)) => m
                                  (provided
+                                   (temperature_monitor.alarm/sound-alarm alarm) => true :times 2
                                    (temperature_monitor.log/add-entry log anything anything anything)
                                    => true :times 4))
                            ))
