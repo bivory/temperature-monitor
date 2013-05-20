@@ -48,9 +48,10 @@
          (number? curr-time)
          (not (nil? curr-temps))
          (coll? curr-temps)]}
-  (->> curr-temps
-       (map (fn [{:keys [id]}] [id curr-time]))
-       (into {})))
+  (let [curr-times (->> curr-temps
+                        (map (fn [{:keys [id]}] [id curr-time]))
+                        (into {}))]
+    (merge curr-times prev-times)))
 
 (defn- ^{:testable true} check-sensors
   "Returns a list of sensor ids and readings."

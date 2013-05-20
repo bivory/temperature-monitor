@@ -113,6 +113,9 @@
                            (fact "given sensor readings with no previous times"
                                  (update-exceeded-times {} 0 sensors) => {0 0, 2 0}
                                  (update-exceeded-times {} 1 sensors) => {0 1, 2 1})
+                           (fact "given sensor readings with previous times"
+                                 (update-exceeded-times {0 0, 2 0} 1 sensors) => {0 0, 2 0}
+                                 (update-exceeded-times {0 1, 2 2} 3 sensors) => {0 1, 2 2})
                            ))
 
 
