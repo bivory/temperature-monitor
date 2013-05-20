@@ -51,7 +51,9 @@
   (let [curr-times (->> curr-temps
                         (map (fn [{:keys [id]}] [id curr-time]))
                         (into {}))]
-    (merge curr-times prev-times)))
+    (->> (merge curr-times prev-times)
+         (filter (fn [[id t]] (contains? curr-times id)))
+         (into {}))))
 
 (defn- ^{:testable true} check-sensors
   "Returns a list of sensor ids and readings."

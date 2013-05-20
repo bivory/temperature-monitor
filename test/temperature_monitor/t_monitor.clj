@@ -116,7 +116,12 @@
                            (fact "given sensor readings with previous times"
                                  (update-exceeded-times {0 0, 2 0} 1 sensors) => {0 0, 2 0}
                                  (update-exceeded-times {0 1, 2 2} 3 sensors) => {0 1, 2 2})
-                           ))
+                           (fact "given sensor readings with some previous times"
+                                 (update-exceeded-times {2 0} 1 sensors) => {0 1, 2 0}
+                                 (update-exceeded-times {0 1} 3 sensors) => {0 1, 2 3})
+                           (fact "given sensor readings with some previous times removed"
+                                 (update-exceeded-times {0 0, 2 0} 1 (drop 1 sensors)) => {2 0}
+                                 (update-exceeded-times {0 1, 2 2} 3 (take 1 sensors)) => {0 1})))
 
 
 (facts "about check-sensors"
